@@ -4,9 +4,6 @@
 
 ## AIM:
  
-
- 
-
 To write a C program to implement the Playfair Substitution technique.
 
 ## DESCRIPTION:
@@ -35,9 +32,117 @@ STEP-5: Display the obtained cipher text.
 
 
 Program:
+```
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
+char keyTable[5][5];
 
+// Function to generate the key matrix
+void generateKeyTable(char key[])
+{
+    int i, j, k = 0, used[26] = {0};
+
+    for (i = 0; key[i] != '\0'; i++)
+    {
+        if (key[i] == 'J')
+            key[i] = 'I';
+
+        if (!used[key[i] - 'A'])
+        {
+            keyTable[k / 5][k % 5] = key[i];
+            used[key[i] - 'A'] = 1;
+            k++;
+        }
+    }
+
+    for (i = 0; i < 26; i++)
+    {
+        if (i + 'A' == 'J') continue;
+        if (!used[i])
+        {
+            keyTable[k / 5][k % 5] = i + 'A';
+            k++;
+        }
+    }
+}
+
+// Find position of a character in key table
+void findPosition(char ch, int *row, int *col)
+{
+    int i, j;
+    for (i = 0; i < 5; i++)
+        for (j = 0; j < 5; j++)
+            if (keyTable[i][j] == ch)
+            {
+                *row = i;
+                *col = j;
+                return;
+            }
+}
+
+// Encrypt plaintext using Playfair Cipher
+void encrypt(char text[])
+{
+    int i, r1, c1, r2, c2;
+
+    for (i = 0; i < strlen(text); i += 2)
+    {
+        findPosition(text[i], &r1, &c1);
+        findPosition(text[i + 1], &r2, &c2);
+
+        if (r1 == r2)  // Same row
+        {
+            printf("%c%c", keyTable[r1][(c1 + 1) % 5],
+                           keyTable[r2][(c2 + 1) % 5]);
+        }
+        else if (c1 == c2)  // Same column
+        {
+            printf("%c%c", keyTable[(r1 + 1) % 5][c1],
+                           keyTable[(r2 + 1) % 5][c2]);
+        }
+        else  // Rectangle rule
+        {
+            printf("%c%c", keyTable[r1][c2],
+                           keyTable[r2][c1]);
+        }
+    }
+}
+
+int main()
+{
+    char key[50], text[50];
+    int i, len;
+
+    printf("Enter the key: ");
+    scanf("%s", key);
+
+    printf("Enter the plaintext: ");
+    scanf("%s", text);
+
+    // Convert to uppercase and replace J with I
+    for (i = 0; text[i]; i++)
+    {
+        text[i] = toupper(text[i]);
+        if (text[i] == 'J')
+            text[i] = 'I';
+    }
+
+    len = strlen(text);
+    if (len % 2 != 0)
+        text[len] = 'X', text[len + 1] = '\0';
+
+    generateKeyTable(key);
+
+    printf("Cipher Text: ");
+    encrypt(text);
+
+    return 0;
+}
+```
 
 
 
 Output:
+<img width="1650" height="735" alt="image" src="https://github.com/user-attachments/assets/f990cbee-01c8-4e77-bc85-c727f0b604bb" />
